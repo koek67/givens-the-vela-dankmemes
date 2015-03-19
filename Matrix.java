@@ -14,11 +14,17 @@ public class Matrix {
     private ArrayList<ArrayList<Double>> backing;
     private int rows, cols;
 
+    /**
+     * will create an empty 2D ArrayList
+     */
     public Matrix() {
         this.backing = new ArrayList<ArrayList<Double>>();
         init();
     }
 
+    /**
+     * will comvert a 2D array into a 2D ArrayList
+     */
     public Matrix(double[][] input) {
         rows = input.length;
         cols = input[0].length;
@@ -35,18 +41,19 @@ public class Matrix {
         }
     }
 
+    /**
+     * helper method for no-args constructor
+     */
     private void init() {
         for (ArrayList<Double> a : backing) {
             a = new ArrayList<Double>();
         }
     }
 
+    // BEGIN GETTERS/SETTERS
+
     public int getRows(){return rows;}
     public int getCols(){return cols;}
-
-    public boolean isValid(int i, int j) {
-        return (i >= 0 && i < rows) && (j >= 0 && j < cols);
-    }
 
     public double get(int i, int j) {
         if (!isValid(i, j)) {
@@ -62,6 +69,18 @@ public class Matrix {
         backing.get(i).set(j, value);
     }
 
+    // END GETTERS/SETTERS
+
+    /**
+     * @return true if (i, j) is in bounds
+     */
+    public boolean isValid(int i, int j) {
+        return (i >= 0 && i < rows) && (j >= 0 && j < cols);
+    }
+
+    /**
+     * will print out the 2D arraylist to the console
+     */
     public void print() {
         for (ArrayList<Double> a : backing) {
             System.out.println(a);
@@ -69,6 +88,11 @@ public class Matrix {
     }
 
     // START THE GOOD STUFF
+
+    /**
+     * Will add this matrix to other.
+     * This matrix will be modified to be the sum of the two matricies
+     */
     public void add(Matrix other) {
         // check the sizes
         if (rows != other.getRows() || cols != other.getCols()) {
@@ -83,6 +107,10 @@ public class Matrix {
         }
     }
 
+    /**
+     * Will perform operation this - other.
+     * This matrix will be modified to be the difference of the two matricies
+     */
     public void subtract(Matrix other) {
         // check the sizes
         if (rows != other.getRows() || cols != other.getCols()) {
@@ -97,15 +125,22 @@ public class Matrix {
         }
     }
 
+    /**
+     * Modifies values to be a hilbert matrix.
+     * TODO doesn't work. think i did something stupid
+     */
     public void makeHilbert() {
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
-                double value = 1 / (i + j - 1);
+                double value = 1 / ((i + 1) + (j + 1) - 1);
                 set(i, j, value);
             }
         }
     }
 
+    /**
+     * Will perform an in-place rref() on the backing matrix
+     */
     public void rref() {
         int lead = 0;
         for (int r = 0; r < rows; r++) {
