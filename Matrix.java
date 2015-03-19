@@ -19,10 +19,6 @@ public class Matrix {
         init();
     }
 
-    public Matrix(double[][] mat) {
-
-    }
-
     private void init() {
         for (ArrayList<Double> a : backing) {
             a = new ArrayList<Double>();
@@ -50,11 +46,84 @@ public class Matrix {
         backing.get(i).set(j, value);
     }
 
+    public void print() {
+        for (ArrayList<Double> a : backing) {
+            System.out.println(a);
+        }
+    }
+
     // START THE GOOD STUFF
     public void add(Matrix other) {
         // check the sizes
         if (rows != other.getRows() || cols != other.getCols()) {
             throw new IllegalArgumentException("fix dimensions pl0x");
+        }
+        // now do the thing
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                double sum = get(i, j) + other.get(i, j);
+                set(i, j, sum);
+            }
+        }
+    }
+
+    public void subtract(Matrix other) {
+        // check the sizes
+        if (rows != other.getRows() || cols != other.getCols()) {
+            throw new IllegalArgumentException("fix dimensions pl0x");
+        }
+        // now do the thing
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                double diff = get(i, j) - other.get(i, j);
+                set(i, j, diff);
+            }
+        }
+    }
+
+    public void makeHilbert() {
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                double value = 1 / (i + j - 1);
+                set(i, j, value);
+            }
+        }
+    }
+
+    public void rref() {
+        double lead = 0;
+        for (int r = 0; i < rows; r++) {
+            if (cols <= lead) {
+                return;
+            }
+            int i = r;
+            while (get(i, lead) == 0) {
+                i++;
+                if (rows == i) {
+                    i = r;
+                    lead++;
+                    if (cols == lead) {
+                        return;
+                    }
+                }
+            }
+            ArrayList<Double> tmp = backing[i];
+            backing[i] = backing[r];
+            backing[r] = tmp;
+            double val = get(r, lead);
+            for (int j = 0; j < cols; j++) {
+                set(r, j, get(r, j) / val);
+            }
+            for (int i = 0; i < rows; i++) {
+                if (i == r) {
+                    continue;
+                }
+                val = get(i, lead);
+                for (int j = 0; j < cols; j++) {
+                    set(i, j, get(i, j) - val * get(r, j));
+                }
+            }
+            lead++;
         }
     }
 }
