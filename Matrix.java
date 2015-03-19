@@ -19,6 +19,22 @@ public class Matrix {
         init();
     }
 
+    public Matrix(double[][] input) {
+        rows = input.length;
+        cols = input[0].length;
+        this.backing = new ArrayList<ArrayList<Double>>();
+        for (int i = 0; i < rows; i++) {
+            backing.add(new ArrayList<Double>(cols));
+        }
+        int i = 0;
+        for (ArrayList<Double> a : backing) {
+            for (int j = 0; j < cols; j++) {
+                a.add(input[i][j]);
+            }
+            i++;
+        }
+    }
+
     private void init() {
         for (ArrayList<Double> a : backing) {
             a = new ArrayList<Double>();
@@ -91,8 +107,8 @@ public class Matrix {
     }
 
     public void rref() {
-        double lead = 0;
-        for (int r = 0; i < rows; r++) {
+        int lead = 0;
+        for (int r = 0; r < rows; r++) {
             if (cols <= lead) {
                 return;
             }
@@ -107,23 +123,35 @@ public class Matrix {
                     }
                 }
             }
-            ArrayList<Double> tmp = backing[i];
-            backing[i] = backing[r];
-            backing[r] = tmp;
+            ArrayList<Double> tmp = backing.get(i);
+            backing.set(i, backing.get(r));
+            backing.set(r, tmp);
             double val = get(r, lead);
             for (int j = 0; j < cols; j++) {
                 set(r, j, get(r, j) / val);
             }
-            for (int i = 0; i < rows; i++) {
-                if (i == r) {
+            for (int a = 0; a < rows; a++) {
+                if (a == r) {
                     continue;
                 }
-                val = get(i, lead);
+                val = get(a, lead);
                 for (int j = 0; j < cols; j++) {
-                    set(i, j, get(i, j) - val * get(r, j));
+                    set(a, j, get(a, j) - val * get(r, j));
                 }
             }
             lead++;
         }
     }
+
+    public static void main(String[] args) {
+        double[][] input = {
+                            {6, 7, 8, 9},
+                            {5, 4, 3, 7},
+                            {7, 9, 9, 0}
+                        };
+        Matrix m = new Matrix(input);
+        m.rref();
+        m.print();
+    }
+
 }
