@@ -132,7 +132,7 @@ public class Matrix {
     public void makeHilbert() {
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
-                double value = 1 / ((i + 1) + (j + 1) - 1);
+                double value = 1.0 / ((i + 1.0) + (j + 1.0) - 1);
                 set(i, j, value);
             }
         }
@@ -185,7 +185,7 @@ public class Matrix {
                             {7, 9, 9, 0}
                         };
         Matrix m = new Matrix(input);
-        m.rref();
+        m.makeHilbert();
         m.print();
     }
 
