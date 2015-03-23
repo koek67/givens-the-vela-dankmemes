@@ -1,8 +1,8 @@
 public class Bit {
     private int value;
 
-    public static BIT.ONE = 1;
-    public static BIT.ZERO = 0;
+    public static int ONE = 1;
+    public static int ZERO = 0;
 
     public Bit (int b) {
         this.value = b;
