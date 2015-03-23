@@ -35,7 +35,7 @@ public class Matrix {
         int i = 0;
         for (ArrayList<Double> a : backing) {
             for (int j = 0; j < cols; j++) {
-                a.add(input[i][j]);
+                a.add((double)input[i][j]);
             }
             i++;
         }
@@ -127,7 +127,6 @@ public class Matrix {
 
     /**
      * Modifies values to be a hilbert matrix.
-     * TODO doesn't work. think i did something stupid
      */
     public void makeHilbert() {
         for (int i = 0; i < rows; i++) {
@@ -163,29 +162,30 @@ public class Matrix {
             backing.set(r, tmp);
             double val = get(r, lead);
             for (int j = 0; j < cols; j++) {
-                set(r, j, get(r, j) / val);
+                set(r, j, get(r, j) / val * 1.0);
             }
             for (int a = 0; a < rows; a++) {
                 if (a == r) {
                     continue;
                 }
-                val = get(a, lead);
+                val = get(a, lead) * 1.0;
                 for (int j = 0; j < cols; j++) {
-                    set(a, j, get(a, j) - val * get(r, j));
+                    set(a, j, get(a, j) - val * get(r, j) * 1.0);
                 }
             }
             lead++;
         }
     }
 
+
     public static void main(String[] args) {
         double[][] input = {
-                            {6, 7, 8, 9},
-                            {5, 4, 3, 7},
-                            {7, 9, 9, 0}
+                            {1, 3, 4, 9},
+                            {4, 4, 2, 7},
+                            {3, 3, 2, 0}
                         };
         Matrix m = new Matrix(input);
-        m.makeHilbert();
+        m.rref();
         m.print();
     }
 
