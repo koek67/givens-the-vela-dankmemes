@@ -10,6 +10,8 @@ public class Bit {
 
     public int value() { return value; }
 
+    public String toString() { return value + ""; }
+
     public Bit xor(Bit other) {
         int xor = value ^ other.value();
         return new Bit(xor);

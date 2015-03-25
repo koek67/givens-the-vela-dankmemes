@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 /**
  * A Bucket is a node in a pthaway that holds a bit.
  */
@@ -11,6 +12,10 @@ public class Bucket {
         this.path = path;
     }
 
+    public Bucket() { this(null); }
+
+    public void setPathway(Pathway p) { path  = p; }
+
     /**
      * Will send the current Bit over the pathway
      * and acquire the newData in its store.
@@ -18,7 +23,7 @@ public class Bucket {
     public void shift(Bit newData) {
         // send current bit over the pathway
         if (data != null)
-            pathway.send(data);
+            path.send(data);
         // reset the data to new data
         data = newData;
     }

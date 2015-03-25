@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 /**
  * XORBuckets are spcial kinds of buckets that have
  * buffers that, when full, will xor all the values
@@ -22,8 +23,8 @@ public class XORBucket extends Bucket {
 
     public void shift(Bit newData) {
         // place old data into buffer
-        if (data != null)
-            buffer.add(data);
+        if (newData != null)
+            buffer.add(newData);
 
         // proceed with buffer operations //
 
@@ -46,6 +47,10 @@ public class XORBucket extends Bucket {
         }
 
         dump.add(result);
+    }
+
+    public void printDump() {
+        System.out.println(dump);
     }
 
 }
