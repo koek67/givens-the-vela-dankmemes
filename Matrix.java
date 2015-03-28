@@ -1,4 +1,6 @@
 import java.util.*;
+import java.util.Objects;
+
 /**
  * functions to implement:
  * - add 2 matricies
@@ -177,6 +179,43 @@ public class Matrix {
         }
     }
 
+    public T[] qr_fact_givens() {
+        T[] returnable = (T[]) new Object[];
+        Matrix givens = new Matrix();
+        Double error = 0;
+        ArrayList<ArrayList<Double>> copy = backing.clone();
+        for (int x = 0; x < rows && x < cols; x++ ) {
+            givens.set(x, x, 1);
+        }
+        double error;
+        for (int x = 0; x < rows - 1; x++) {
+            for (int y = cols; y > x; y--) {
+                Matrix temp = givensRotate(x, y);
+                backing = temp.mult(backing);
+                givens = givens.mult(givens.transpose());
+            }
+        }
+        returnable[0] = backing;
+        returnable[1] = givens;
+        returnable[2] = error;
+        backing = copy;
+    }
+    public Matrix givensRotate (int row, int col) {
+        double x1 = get(ind - 1, col);
+        double x2 = get(ind, col);
+        double cosx = x1 / Math.sqrt(x1 * x1 + x2 * x2);
+        double sinx = -x2 / Math.sqrt(x1 * x1 + x2 * x2);
+        Matrix givens = new Matrix();
+        for (int x = 0; x < rows && x < cols; x++ ) {
+            givens.set(x,x,1);
+        }
+        givens.set(row, col, sinx);
+        givens.set(row - 1, col + 1, -sinx);
+        givens.set(row, col + 1, cosx);
+        givens.set(row - 1,col, cosx);
+        return givens;
+    }
+    public String dankMemes() { return "Jet Fuel can't dank steel memes"; }
 
     public static void main(String[] args) {
         double[][] input = {
