@@ -1,4 +1,7 @@
+import java.lang.Double;
+import java.lang.IllegalArgumentException;
 import java.util.*;
+import java.util.ArrayList;
 import java.util.Objects;
 
 /**
@@ -53,9 +56,51 @@ public class Matrix {
     }
 
     // BEGIN GETTERS/SETTERS
-
     public int getRows(){return rows;}
     public int getCols(){return cols;}
+    public ArrayList<Double> getCol(int x) {
+        return backing.get(x);
+    }
+    public ArrayList<Double> getRow(int x) {
+        ArrayList<Double> nums = new ArrayList<Double>();
+        for (int y = 0; y < cols; y++) {
+            nums.add(backing.get(y).get(x));
+        }
+        return nums;
+    }
+
+    public static double dotProduct(ArrayList<Double> v1, ArrayList<Double> v2) {
+        double dotProd = 0;
+        for(int x = 0; x < v1.size() && x < v2.size(); x++) {
+            dotProd += v1.get(x) * v2.get(x);
+        }
+        return dotProd;
+    }
+    public static Matrix mult(Matrix m1, Matrix m2) {
+        if(m1.cols != m2.rows) {
+            throw new IllegalArgumentException("Matrices of improper dims");
+        }
+        Matrix prod = new Matrix();
+        for (int x = 0; x < m1.rows; x++) {
+            for (int y = 0; y < m2.cols; y++) {
+                prod.set(x, y, dotProduct(m1.getRow(x), m2.getCol(y)));
+            }
+        }
+        return prod;
+    }
+
+    public static Matrix transpose(Matrix m1) {
+        Matrix trans = new Matrix();
+        for (int x = 0; x < m1.rows / 2; x++) {
+            for (int y = 0; y < m1.cols / 2; y++) {
+                double temp = m1.get(x,y);
+                m1.set(x,y, m1.get(y, x));
+                m1.set(y, x, temp);
+            }
+        }
+        return trans;
+    }
+
 
     public double get(int i, int j) {
         if (!isValid(i, j)) {
@@ -87,6 +132,16 @@ public class Matrix {
         for (ArrayList<Double> a : backing) {
             System.out.println(a);
         }
+    }
+
+    public Matrix clone() {
+        Matrix copy = new Matrix();
+        for (int x = 0; x < rows; x++) {
+            for (int y =0; y < cols; y++) {
+                copy.set(x, y, get(x, y));
+            }
+        }
+        return copy;
     }
 
     // START THE GOOD STUFF
@@ -179,30 +234,44 @@ public class Matrix {
         }
     }
 
-    public T[] qr_fact_givens() {
-        T[] returnable = (T[]) new Object[];
+    public FactoredMatrix qr_fact_givens() {
+
         Matrix givens = new Matrix();
-        Double error = 0;
-        ArrayList<ArrayList<Double>> copy = backing.clone();
+        double error = 0;
+        Matrix copy = this.clone();
         for (int x = 0; x < rows && x < cols; x++ ) {
             givens.set(x, x, 1);
         }
-        double error;
-        for (int x = 0; x < rows - 1; x++) {
+        for (int x = rows - 1; x >= 0; x--) {
             for (int y = cols; y > x; y--) {
                 Matrix temp = givensRotate(x, y);
-                backing = temp.mult(backing);
-                givens = givens.mult(givens.transpose());
+                copy = mult(temp, copy);
+                givens = mult(givens, transpose(givens));
             }
         }
-        returnable[0] = backing;
-        returnable[1] = givens;
-        returnable[2] = error;
-        backing = copy;
+        Matrix QR = mult(givens, copy);
+        QR.subtract(this);
+        error = QR.norm();
+        FactoredMatrix returnable = new FactoredMatrix(givens, copy, error);
+        return returnable;
     }
+
+    public double norm() {
+        double max = 0;
+        for (int x = 0; x < rows; x++) {
+            for (int y =0; y < cols; y++) {
+                if (max < get (x,y)) {
+                    max = get(x, y);
+                }
+            }
+        }
+        return max;
+    }
+
+
     public Matrix givensRotate (int row, int col) {
-        double x1 = get(ind - 1, col);
-        double x2 = get(ind, col);
+        double x1 = get(row - 1, col);
+        double x2 = get(row, col);
         double cosx = x1 / Math.sqrt(x1 * x1 + x2 * x2);
         double sinx = -x2 / Math.sqrt(x1 * x1 + x2 * x2);
         Matrix givens = new Matrix();
@@ -215,7 +284,6 @@ public class Matrix {
         givens.set(row - 1,col, cosx);
         return givens;
     }
-    public String dankMemes() { return "Jet Fuel can't dank steel memes"; }
 
     public static void main(String[] args) {
         double[][] input = {
