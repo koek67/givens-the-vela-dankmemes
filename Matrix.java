@@ -263,6 +263,43 @@ public class Matrix {
             lead++;
         }
     }
+
+
+    public FactoredMatrix lu_fact() {
+        Matrix L = new Matrix(rows, cols);
+        for(int x =0; x < rows; x++) {
+            L.set(x, x, 1);
+        }
+        Matrix U = this.clone();
+        System.out.println(U);
+        for (int y = 0; y < cols - 1; y++) {
+            Matrix currL = new Matrix(rows, cols);
+            for(int x =0; x < rows; x++) {
+                currL.set(x, x, 1);
+            }
+
+
+            for (int x = y + 1; x < rows ; x++) {
+                double currElim = U.get(y, x);
+                double pivot = U.get(y, y);
+                double val = currElim / pivot;
+                L.set(x, y, val);
+                currL.set(x, y, -val);
+            }
+            System.out.println(L);
+            U = mult(currL, U);
+            System.out.println(U);
+        }
+        Matrix LU = mult(L, U);
+        LU.subtract(this);
+        double error = LU.norm();
+        FactoredMatrix fm = new FactoredMatrix(L, U, error);
+        return fm;
+    }
+
+
+
+
     public double norm() {
         double max = 0;
         for (int x = 0; x < rows; x++) {
@@ -413,7 +450,7 @@ public class Matrix {
 
 
         Matrix m = new Matrix(input);
-        FactoredMatrix givens = m.qr_fact_house();
+        FactoredMatrix givens = m.lu_fact();
         Matrix m2 = new Matrix(input2);
         System.out.println(givens.left);
         System.out.println(givens.right);
