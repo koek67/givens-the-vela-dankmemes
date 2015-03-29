@@ -22,21 +22,22 @@ public class XORBucket extends Bucket {
     }
 
     public void shift(Bit newData) {
-        // place old data into buffer
+        // // place old data into buffer
+        // if (newData != null)
+        //     buffer.add(newData);
+        //
+        // // proceed with buffer operations //
+        //
+        // // if buffer is full
+        // if (buffer.size() == 3) {
+        //     // xor all the values and add to dump
+        //     dump();
+        //     // clear the buffer
+        //     buffer.clear();
+        // }
         if (newData != null)
             buffer.add(newData);
-
-        // proceed with buffer operations //
-
-        // if buffer is full
-        if (buffer.size() == 3) {
-            // xor all the values and add to dump
-            dump();
-            // clear the buffer
-            buffer.clear();
-        }
-
-        data = newData;
+        dump();
     }
 
     public void dump() {
@@ -47,6 +48,7 @@ public class XORBucket extends Bucket {
         }
 
         dump.add(result);
+        buffer.clear();
     }
 
     public void printDump() {

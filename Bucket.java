@@ -22,8 +22,7 @@ public class Bucket {
      */
     public void shift(Bit newData) {
         // send current bit over the pathway
-        if (data != null)
-            path.send(data);
+        path.send(data);
         // reset the data to new data
         data = newData;
     }

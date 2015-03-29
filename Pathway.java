@@ -23,6 +23,7 @@ public class Pathway {
      * this pathway.
      */
     public void send(Bit data) {
+        //System.out.println("Bit: " + data + " sent");
         // iterate through the endpoints and
         // send the Bit data
         for (Bucket b : endpoints) {
