@@ -28,7 +28,7 @@ public class Matrix {
     }
 
     /**
-     * will comvert a 2D array into a 2D ArrayList
+     * will convert a 2D array into a 2D ArrayList
      */
     public Matrix(double[][] input) {
         rows = input.length;
@@ -46,6 +46,29 @@ public class Matrix {
         }
     }
 
+    public Matrix(int n, int m) {
+        this(genMatrix(n, m));
+    }
+
+    public static double[][] genMatrix(int n, int m) {
+        double[][] arr = new double[n][m];
+        for (int x = 0; x < n; x++) {
+            for (int y = 0; y < m; y++) {
+                arr[x][y] = 0;
+            }
+        }
+        return arr;
+    }
+
+    public double[][] toArray() {
+        double[][] arr = new double[rows][cols];
+        for (int x =0; x < rows; x++) {
+            for (int y =0; y < cols; y++) {
+                arr[x][y] = get(x, y);
+            }
+        }
+        return arr;
+    }
     /**
      * helper method for no-args constructor
      */
@@ -58,12 +81,12 @@ public class Matrix {
     // BEGIN GETTERS/SETTERS
     public int getRows(){return rows;}
     public int getCols(){return cols;}
-    public ArrayList<Double> getCol(int x) {
+    public ArrayList<Double> getRow(int x) {
         return backing.get(x);
     }
-    public ArrayList<Double> getRow(int x) {
+    public ArrayList<Double> getCol(int x) {
         ArrayList<Double> nums = new ArrayList<Double>();
-        for (int y = 0; y < cols; y++) {
+        for (int y = 0; y < rows; y++) {
             nums.add(backing.get(y).get(x));
         }
         return nums;
@@ -71,6 +94,9 @@ public class Matrix {
 
     public static double dotProduct(ArrayList<Double> v1, ArrayList<Double> v2) {
         double dotProd = 0;
+        if (v1.size() != v2.size()) {
+            throw new IllegalArgumentException("mismatched input lengths");
+        }
         for(int x = 0; x < v1.size() && x < v2.size(); x++) {
             dotProd += v1.get(x) * v2.get(x);
         }
@@ -80,7 +106,7 @@ public class Matrix {
         if(m1.cols != m2.rows) {
             throw new IllegalArgumentException("Matrices of improper dims");
         }
-        Matrix prod = new Matrix();
+        Matrix prod = new Matrix(m1.rows, m2.cols);
         for (int x = 0; x < m1.rows; x++) {
             for (int y = 0; y < m2.cols; y++) {
                 prod.set(x, y, dotProduct(m1.getRow(x), m2.getCol(y)));
@@ -90,12 +116,10 @@ public class Matrix {
     }
 
     public static Matrix transpose(Matrix m1) {
-        Matrix trans = new Matrix();
-        for (int x = 0; x < m1.rows / 2; x++) {
-            for (int y = 0; y < m1.cols / 2; y++) {
-                double temp = m1.get(x,y);
-                m1.set(x,y, m1.get(y, x));
-                m1.set(y, x, temp);
+        Matrix trans = new Matrix(m1.cols, m1.rows);
+        for (int x = 0; x < m1.rows; x++) {
+            for (int y = 0; y < m1.cols; y++) {
+                trans.set(y, x, m1.get(x, y));
             }
         }
         return trans;
@@ -114,6 +138,17 @@ public class Matrix {
             throw new IllegalArgumentException("out of bounds pl0x");
         }
         backing.get(i).set(j, value);
+    }
+
+    public String toString() {
+        String representation = "";
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                representation += String.format("%03.6f\t", get(i,j));
+            }
+            representation += "\n";
+        }
+        return representation;
     }
 
     // END GETTERS/SETTERS
@@ -135,12 +170,7 @@ public class Matrix {
     }
 
     public Matrix clone() {
-        Matrix copy = new Matrix();
-        for (int x = 0; x < rows; x++) {
-            for (int y =0; y < cols; y++) {
-                copy.set(x, y, get(x, y));
-            }
-        }
+        Matrix copy = new Matrix(this.toArray());
         return copy;
     }
 
@@ -233,20 +263,41 @@ public class Matrix {
             lead++;
         }
     }
+    public double norm() {
+        double max = 0;
+        for (int x = 0; x < rows; x++) {
+            for (int y = 0; y < cols; y++) {
+                if (max < get (x,y)) {
+                    max = get(x, y);
+                }
+            }
+        }
+        return max;
+    }
+
+    public static double norm(ArrayList<Double> arr) {
+        return Math.sqrt(dotProduct(arr, arr));
+    }
+
 
     public FactoredMatrix qr_fact_givens() {
 
-        Matrix givens = new Matrix();
-        double error = 0;
+        Matrix givens = new Matrix(rows, cols);
+        double error;
         Matrix copy = this.clone();
         for (int x = 0; x < rows && x < cols; x++ ) {
             givens.set(x, x, 1);
         }
-        for (int x = rows - 1; x >= 0; x--) {
-            for (int y = cols; y > x; y--) {
-                Matrix temp = givensRotate(x, y);
+
+        for (int y = 0; y < cols - 1; y++) {
+            for (int x = rows - 1; x > y ; x--) {
+                Matrix temp = copy.givensRotate(y, x);
+                System.out.println(temp);
                 copy = mult(temp, copy);
-                givens = mult(givens, transpose(givens));
+                System.out.println(copy);
+                givens = mult(givens, transpose(temp));
+                //System.out.println(givens);
+                System.out.println(x + "  :x   +   y:" + y);
             }
         }
         Matrix QR = mult(givens, copy);
@@ -256,44 +307,115 @@ public class Matrix {
         return returnable;
     }
 
-    public double norm() {
-        double max = 0;
-        for (int x = 0; x < rows; x++) {
-            for (int y =0; y < cols; y++) {
-                if (max < get (x,y)) {
-                    max = get(x, y);
-                }
-            }
-        }
-        return max;
-    }
-
-
     public Matrix givensRotate (int row, int col) {
-        double x1 = get(row - 1, col);
-        double x2 = get(row, col);
-        double cosx = x1 / Math.sqrt(x1 * x1 + x2 * x2);
-        double sinx = -x2 / Math.sqrt(x1 * x1 + x2 * x2);
-        Matrix givens = new Matrix();
+        double x1 = get(row, row);
+        double x2 = get(col, row);
+        System.out.println("x1 : " + x1 + "    x2:   " + x2);
+        double cosx = x1 / Math.hypot(x1, x2);
+        double sinx = -x2 / Math.hypot(x1, x2);
+        Matrix givens = new Matrix(rows, cols);
         for (int x = 0; x < rows && x < cols; x++ ) {
             givens.set(x,x,1);
         }
-        givens.set(row, col, sinx);
-        givens.set(row - 1, col + 1, -sinx);
-        givens.set(row, col + 1, cosx);
-        givens.set(row - 1,col, cosx);
+        givens.set(row, col, -sinx);
+        givens.set(col, row, sinx);
+        givens.set(row, row, cosx);
+        givens.set(col, col, cosx);
         return givens;
     }
 
+    public FactoredMatrix qr_fact_house () {
+        Matrix R = this.clone();
+        Matrix Q = new Matrix(rows, cols);
+        for (int x = 0; x < rows && x < cols; x++) {
+            set(x, x, 1);
+        }
+        for (int x = 0; x < cols; x++) {
+            Matrix temp = householderRotate(x);
+            Q = mult(Q, temp);
+            R = mult(temp, R);
+        }
+        Matrix QR = mult(Q, R);
+        QR.subtract(this);
+        double error = QR.norm();
+        return new FactoredMatrix(Q, R , error);
+    }
+
+    public static double[][] toArray(ArrayList<Double> v1) {
+        double[][] arr = new double[v1.size()][1];
+        for (int x = 0; x < v1.size(); x++) {
+            arr[x][0] = v1.get(x);
+        }
+        return arr;
+    }
+
+
+    public Matrix householderRotate (int col) {
+        ArrayList<Double> curCol = new ArrayList<>(getCol(col).subList(col, cols));
+        double normCol = norm(curCol);
+        curCol.set(col, curCol.get(col) + Math.signum(curCol.get(col)) * normCol);
+        Matrix u = new Matrix(toArray(curCol));
+        System.out.println(col + "     " + u);
+        Matrix ut = transpose(u);
+        Matrix house = new Matrix(rows - col, cols - col);
+        for (int x = 0; x < rows - col && x < cols - col; x++) {
+            house.set(x, x, 1);
+        }
+        house.subtract(mult(u,ut).scale(2 / norm(curCol)));
+
+
+        Matrix Q = new Matrix(rows, cols);
+        for (int x = 0; x < rows && x < cols; x++) {
+            Q.set(x, x, 1);
+        }
+        for(int x = col; x < rows; x++) {
+            for( int y = col; y < cols; y++) {
+                Q.set( x, y, house.get(house.rows - x, house.cols - y));
+            }
+        }
+
+
+        return Q;
+    }
+
+    public Matrix scale(double scal) {
+        Matrix scale = this.clone();
+        for (int x = 0 ; x < rows; x++) {
+            for( int y =0; y < cols; y++) {
+                scale.set(x, y , scale.get(x, y) * scal);
+            }
+        }
+        return scale;
+    }
+
+
+
+
+
     public static void main(String[] args) {
         double[][] input = {
-                            {1, 3, 4, 9},
-                            {4, 4, 2, 7},
-                            {3, 3, 2, 0}
-                        };
+                {1, .5, .333333, .25},
+                {.5, .333333, .25, .2},
+                {.333333, .25, .2, .166667},
+                {.25, .2, .166667, .142857}
+        };
+
+        double[][] input2 = {
+                {1, .5}
+        };
+        double[][] input3 = {
+                {1},
+                {.5}
+        };
+
+
+
         Matrix m = new Matrix(input);
-        m.rref();
-        m.print();
+        FactoredMatrix givens = m.qr_fact_house();
+        Matrix m2 = new Matrix(input2);
+        System.out.println(givens.left);
+        System.out.println(givens.right);
+        System.out.println(givens.error);
     }
 
 }
