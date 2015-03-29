@@ -328,13 +328,17 @@ public class Matrix {
         Matrix R = this.clone();
         Matrix Q = new Matrix(rows, cols);
         for (int x = 0; x < rows && x < cols; x++) {
-            set(x, x, 1);
+            Q.set(x, x, 1);
         }
-        for (int x = 0; x < cols; x++) {
-            Matrix temp = householderRotate(x);
+        for (int x = 0; x < cols - 1; x++) {
+            Matrix temp = R.householderRotate(x);
             Q = mult(Q, temp);
             R = mult(temp, R);
+            System.out.println(temp);
+            //System.out.println(Q);
+            System.out.println(R);
         }
+
         Matrix QR = mult(Q, R);
         QR.subtract(this);
         double error = QR.norm();
@@ -353,15 +357,14 @@ public class Matrix {
     public Matrix householderRotate (int col) {
         ArrayList<Double> curCol = new ArrayList<>(getCol(col).subList(col, cols));
         double normCol = norm(curCol);
-        curCol.set(col, curCol.get(col) + Math.signum(curCol.get(col)) * normCol);
+        curCol.set(0, curCol.get(0) + Math.signum(curCol.get(0)) * normCol);
         Matrix u = new Matrix(toArray(curCol));
-        System.out.println(col + "     " + u);
         Matrix ut = transpose(u);
         Matrix house = new Matrix(rows - col, cols - col);
         for (int x = 0; x < rows - col && x < cols - col; x++) {
             house.set(x, x, 1);
         }
-        house.subtract(mult(u,ut).scale(2 / norm(curCol)));
+        house.subtract(mult(u,ut).scale(2 / norm(curCol) / norm(curCol)));
 
 
         Matrix Q = new Matrix(rows, cols);
@@ -370,10 +373,9 @@ public class Matrix {
         }
         for(int x = col; x < rows; x++) {
             for( int y = col; y < cols; y++) {
-                Q.set( x, y, house.get(house.rows - x, house.cols - y));
+                Q.set( x, y, house.get(x - col, y - col));
             }
         }
-
 
         return Q;
     }
