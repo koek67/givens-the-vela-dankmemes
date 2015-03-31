@@ -78,6 +78,35 @@ public class Matrix {
         }
     }
 
+    public static Matrix bad_inverse(Matrix m) {
+        Matrix big = new Matrix(m.getRows(), m.getCols() * 2);
+        for (int i = 0; i < m.getRows(); i++) {
+            for (int j = 0; j < m.getCols() * 2; j++) {
+                if (j < m.getCols()) {
+                    big.set(i, j, m.get(i, j));
+                } else if (i == j - m.getCols()) {
+                    big.set(i, j, 1);
+                }
+            }
+        }
+        big.rref();
+
+        Matrix extract = new Matrix(m.getRows(), m.getCols());
+        for (int i = 0; i < m.getRows(); i++) {
+            int k = 0;
+            for (int j = m.getCols(); j < big.getCols(); j++) {
+                extract.set(i, k, big.get(i, j));
+                k++;
+            }
+        }
+
+        return extract;
+    }
+
+
+
+
+
     // BEGIN GETTERS/SETTERS
     public int getRows(){return rows;}
     public int getCols(){return cols;}
@@ -125,16 +154,17 @@ public class Matrix {
         return trans;
     }
 
+
     public double get(int i, int j) {
         if (!isValid(i, j)) {
-            throw new IllegalArgumentException("out of bounds pl0x: " + i + " " + j + " in \n" + toString());
+            throw new IllegalArgumentException("out of bounds pl0x");
         }
         return backing.get(i).get(j).doubleValue();
     }
 
     public void set(int i, int j, double value) {
         if (!isValid(i, j)) {
-            throw new IllegalArgumentException("out of bounds pl0x: " + i + " " + j + " in \n" + toString());
+            throw new IllegalArgumentException("out of bounds pl0x");
         }
         backing.get(i).set(j, value);
     }
@@ -144,17 +174,6 @@ public class Matrix {
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
                 representation += String.format("%03.6f\t", get(i,j));
-            }
-            representation += "\n";
-        }
-        return representation;
-    }
-
-    public String toStringInt() {
-        String representation = "";
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < cols; j++) {
-                representation += ((int)get(i,j)%2) + "  ";
             }
             representation += "\n";
         }
@@ -234,31 +253,6 @@ public class Matrix {
         }
     }
 
-    public static Matrix bad_inverse(Matrix m) {
-        Matrix big = new Matrix(m.getRows(), m.getCols() * 2);
-        for (int i = 0; i < m.getRows(); i++) {
-            for (int j = 0; j < m.getCols() * 2; j++) {
-                if (j < m.getCols()) {
-                    big.set(i, j, m.get(i, j));
-                } else if (i == j - m.getCols()) {
-                    big.set(i, j, 1);
-                }
-            }
-        }
-        big.rref();
-
-        Matrix extract = new Matrix(m.getRows(), m.getCols());
-        for (int i = 0; i < m.getRows(); i++) {
-            int k = 0;
-            for (int j = m.getCols(); j < big.getCols(); j++) {
-                extract.set(i, k, big.get(i, j));
-                k++;
-            }
-        }
-
-        return extract;
-    }
-
     /**
      * Will perform an in-place rref() on the backing matrix
      */
@@ -306,7 +300,6 @@ public class Matrix {
             L.set(x, x, 1);
         }
         Matrix U = this.clone();
-        System.out.println(U);
         for (int y = 0; y < cols - 1; y++) {
             Matrix currL = new Matrix(rows, cols);
             for(int x =0; x < rows; x++) {
@@ -321,11 +314,10 @@ public class Matrix {
                 L.set(x, y, val);
                 currL.set(x, y, -val);
             }
-            System.out.println(L);
             U = mult(currL, U);
-            System.out.println(U);
         }
         Matrix LU = mult(L, U);
+
         LU.subtract(this);
         double error = LU.norm();
         FactoredMatrix fm = new FactoredMatrix(L, U, error);
@@ -339,8 +331,8 @@ public class Matrix {
         double max = 0;
         for (int x = 0; x < rows; x++) {
             for (int y = 0; y < cols; y++) {
-                if (max < get (x,y)) {
-                    max = get(x, y);
+                if (max < Math.abs(get(x, y))) {
+                    max = Math.abs(get(x, y));
                 }
             }
         }
@@ -364,12 +356,12 @@ public class Matrix {
         for (int y = 0; y < cols - 1; y++) {
             for (int x = rows - 1; x > y ; x--) {
                 Matrix temp = copy.givensRotate(y, x);
-                System.out.println(temp);
+
                 copy = mult(temp, copy);
-                System.out.println(copy);
+
+
                 givens = mult(givens, transpose(temp));
-                //System.out.println(givens);
-                System.out.println(x + "  :x   +   y:" + y);
+
             }
         }
         Matrix QR = mult(givens, copy);
@@ -382,7 +374,7 @@ public class Matrix {
     public Matrix givensRotate (int row, int col) {
         double x1 = get(row, row);
         double x2 = get(col, row);
-        System.out.println("x1 : " + x1 + "    x2:   " + x2);
+
         double cosx = x1 / Math.hypot(x1, x2);
         double sinx = -x2 / Math.hypot(x1, x2);
         Matrix givens = new Matrix(rows, cols);
@@ -406,9 +398,7 @@ public class Matrix {
             Matrix temp = R.householderRotate(x);
             Q = mult(Q, temp);
             R = mult(temp, R);
-            System.out.println(temp);
-            //System.out.println(Q);
-            System.out.println(R);
+
         }
 
         Matrix QR = mult(Q, R);
@@ -462,9 +452,95 @@ public class Matrix {
         return scale;
     }
 
+    public ArrayList<Double> solve_lu_b(ArrayList<Double> b) {
+        ArrayList<Double> solved = new ArrayList<>();
+
+        FactoredMatrix sol = lu_fact();
+        Matrix L = sol.left, U = sol.right;
+        ArrayList<Double> y = augSolverL(L, b);
+        solved = augSolverU(U, y);
+        return solved;
+    }
+
+    public ArrayList<Double> solve_qr_b_H(ArrayList<Double> b) {
+        ArrayList<Double> solved = new ArrayList<>();
+
+        FactoredMatrix sol = qr_fact_house();
+        Matrix Q = sol.left, R = sol.right, Qt = transpose(Q);
+
+        ArrayList<Double> y = mult(Qt, b);
+        solved = augSolverU(R, y);
+        return solved;
+    }
 
 
 
+    public ArrayList<Double> solve_qr_b_G(ArrayList<Double> b) {
+        ArrayList<Double> solved = new ArrayList<>();
+
+        FactoredMatrix sol = qr_fact_givens();
+        Matrix Q = sol.left, R = sol.right, Qt = transpose(Q);
+
+        ArrayList<Double> y = mult(Qt, b);
+        solved = augSolverU(R, y);
+        return solved;
+    }
+
+
+
+    public static ArrayList<Double> mult(Matrix a, ArrayList<Double> b) {
+        ArrayList<Double> mults = new ArrayList<>();
+        if (a.cols != b.size()) {
+            throw new IllegalArgumentException("dims mismatch");
+        }
+        for (int x = 0; x < a.rows; x++) {
+            mults.add(dotProduct(a.backing.get(x), b));
+        }
+        return mults;
+    }
+
+    public static ArrayList<Double> augSolverL(Matrix m, ArrayList<Double> b) {
+        ArrayList<Double> xSolved = new ArrayList<>();
+
+        for(int x = 0; x < m.cols; x++) {
+            double sum = 0.0;
+            for (int y = 0; y < xSolved.size(); y++){
+                sum +=  m.get(x,y) * xSolved.get(y);
+            }
+            xSolved.add((b.get(x) - sum) / m.get(x,x) );
+        }
+        return xSolved;
+    }
+
+    public static ArrayList<Double> augSolverU(Matrix m, ArrayList<Double> b) {
+
+        ArrayList<Double> xSolved = new ArrayList<>(b.size());
+        for(int x =0; x < b.size(); x++) {
+            xSolved.add(0.0);
+        }
+        for(int x = m.rows - 1; x >= 0; x--) {
+            double sum = 0.0;
+            for (int y = x + 1; y < m.cols ; y++){
+                sum +=  m.get(x,y) * xSolved.get(y);
+            }
+            xSolved.set(x, (b.get(x) - sum) / m.get(x, x));
+        }
+        return xSolved;
+    }
+    public double maxNorm(ArrayList<Double> arr1) {
+        double max = 0;
+        for (int x = 0; x < arr1.size(); x++) {
+            if (max < Math.abs(arr1.get(x))) max = Math.abs(arr1.get(x));
+        }
+        return max;
+    }
+    public static ArrayList<Double> subtract(ArrayList<Double> arr1, ArrayList<Double> arr2) {
+        ArrayList<Double> sum = new ArrayList<>();
+        for (int x = 0; x < arr1.size(); x++) {
+            sum.add(arr1.get(x) - arr2.get(x));
+        }
+        return sum;
+    }
 
     public static void main(String[] args) {
         double[][] input = {
@@ -474,31 +550,47 @@ public class Matrix {
                 {.25, .2, .166667, .142857}
         };
 
-        double[][] input2 = {
-                {1, .5}
-        };
+        ArrayList<Double> input2 = new ArrayList<>();
+        input2.add(0.0464159);
+        input2.add(0.0464159);input2.add(0.0464159);
+        input2.add(0.0464159);
+
         double[][] input3 = {
                 {1},
                 {.5}
         };
-
-
-
         Matrix m = new Matrix(input);
-<<<<<<< HEAD
-        FactoredMatrix givens = m.lu_fact();
-        Matrix m2 = new Matrix(input2);
-        System.out.println(givens.left);
-        System.out.println(givens.right);
-        System.out.println(givens.error);
-=======
-        bad_inverse(m);
-        // FactoredMatrix givens = m.qr_fact_house();
-        // Matrix m2 = new Matrix(input2);
-        // System.out.println(givens.left);
-        // System.out.println(givens.right);
-        // System.out.println(givens.error);
->>>>>>> origin/master
+        System.out.print(m.solve_lu_b(input2));
+
+        for (int x = 2; x <= 20; x++) {
+            m = new Matrix(x, x);
+            m.makeHilbert();
+            ArrayList<Double> b = new ArrayList<>();
+            for (int y = 1; y <= x; y++) {
+                b.add(Math.pow(.1, x /3.0));
+            }
+            System.out.println("xsol for LU of "+ x + "x" + x +" Hilbert");
+            System.out.println(m.solve_lu_b(b));
+            System.out.println("error for LU of "+ x + "x" + x +" Hilbert");
+            System.out.println(m.lu_fact().error);
+            System.out.println("xsol for householders QR of "+ x + "x" + x +" Hilbert");
+            System.out.println(m.solve_qr_b_H(b));
+            System.out.println("error for householders QR of " + x + "x" + x + " Hilbert");
+            ArrayList<Double> sol = m.solve_qr_b_G(b);
+            System.out.println(m.qr_fact_house().error);
+            System.out.println("xsol for Givens QR of "+ x + "x" + x +" Hilbert");
+            System.out.println(sol);
+            System.out.println("error for Givens QR of "+ x + "x" + x +" Hilbert");
+            System.out.println(m.qr_fact_givens().error);
+            System.out.println("error for Givens Hxsol - b of "+ x + "x" + x +" Hilbert");
+            System.out.println(norm(subtract(mult(m,sol), b)));
+            System.out.println();
+            System.out.println();
+            System.out.println();
+        }
+
+
+
     }
 
 }
