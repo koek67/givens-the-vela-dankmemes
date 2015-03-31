@@ -298,6 +298,43 @@ public class Matrix {
             lead++;
         }
     }
+
+
+    public FactoredMatrix lu_fact() {
+        Matrix L = new Matrix(rows, cols);
+        for(int x =0; x < rows; x++) {
+            L.set(x, x, 1);
+        }
+        Matrix U = this.clone();
+        System.out.println(U);
+        for (int y = 0; y < cols - 1; y++) {
+            Matrix currL = new Matrix(rows, cols);
+            for(int x =0; x < rows; x++) {
+                currL.set(x, x, 1);
+            }
+
+
+            for (int x = y + 1; x < rows ; x++) {
+                double currElim = U.get(y, x);
+                double pivot = U.get(y, y);
+                double val = currElim / pivot;
+                L.set(x, y, val);
+                currL.set(x, y, -val);
+            }
+            System.out.println(L);
+            U = mult(currL, U);
+            System.out.println(U);
+        }
+        Matrix LU = mult(L, U);
+        LU.subtract(this);
+        double error = LU.norm();
+        FactoredMatrix fm = new FactoredMatrix(L, U, error);
+        return fm;
+    }
+
+
+
+
     public double norm() {
         double max = 0;
         for (int x = 0; x < rows; x++) {
@@ -363,13 +400,17 @@ public class Matrix {
         Matrix R = this.clone();
         Matrix Q = new Matrix(rows, cols);
         for (int x = 0; x < rows && x < cols; x++) {
-            set(x, x, 1);
+            Q.set(x, x, 1);
         }
-        for (int x = 0; x < cols; x++) {
-            Matrix temp = householderRotate(x);
+        for (int x = 0; x < cols - 1; x++) {
+            Matrix temp = R.householderRotate(x);
             Q = mult(Q, temp);
             R = mult(temp, R);
+            System.out.println(temp);
+            //System.out.println(Q);
+            System.out.println(R);
         }
+
         Matrix QR = mult(Q, R);
         QR.subtract(this);
         double error = QR.norm();
@@ -388,15 +429,14 @@ public class Matrix {
     public Matrix householderRotate (int col) {
         ArrayList<Double> curCol = new ArrayList<>(getCol(col).subList(col, cols));
         double normCol = norm(curCol);
-        curCol.set(col, curCol.get(col) + Math.signum(curCol.get(col)) * normCol);
+        curCol.set(0, curCol.get(0) + Math.signum(curCol.get(0)) * normCol);
         Matrix u = new Matrix(toArray(curCol));
-        System.out.println(col + "     " + u);
         Matrix ut = transpose(u);
         Matrix house = new Matrix(rows - col, cols - col);
         for (int x = 0; x < rows - col && x < cols - col; x++) {
             house.set(x, x, 1);
         }
-        house.subtract(mult(u,ut).scale(2 / norm(curCol)));
+        house.subtract(mult(u,ut).scale(2 / norm(curCol) / norm(curCol)));
 
 
         Matrix Q = new Matrix(rows, cols);
@@ -405,10 +445,9 @@ public class Matrix {
         }
         for(int x = col; x < rows; x++) {
             for( int y = col; y < cols; y++) {
-                Q.set( x, y, house.get(house.rows - x, house.cols - y));
+                Q.set( x, y, house.get(x - col, y - col));
             }
         }
-
 
         return Q;
     }
@@ -446,12 +485,20 @@ public class Matrix {
 
 
         Matrix m = new Matrix(input);
+<<<<<<< HEAD
+        FactoredMatrix givens = m.lu_fact();
+        Matrix m2 = new Matrix(input2);
+        System.out.println(givens.left);
+        System.out.println(givens.right);
+        System.out.println(givens.error);
+=======
         bad_inverse(m);
         // FactoredMatrix givens = m.qr_fact_house();
         // Matrix m2 = new Matrix(input2);
         // System.out.println(givens.left);
         // System.out.println(givens.right);
         // System.out.println(givens.error);
+>>>>>>> origin/master
     }
 
 }
