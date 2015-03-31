@@ -16,6 +16,7 @@ public class ShiftRegister {
         out_bot = new ArrayList<Integer>();
         for (int i : _input)
             input.add(i);
+        generate();
     }
 
     public void generate() {
@@ -96,77 +97,61 @@ public class ShiftRegister {
         out_bot = bot;
     }
 
-    public void jacobi() {
-        jacobi_top();
-        jacobi_bot();
+    /**
+     * using the input, create A0
+     */
+    public Matrix get_A0() {
+        int[] data = {1, 0, 1, 1};
+        return make_g(data, input.size());
     }
 
-    public void jacobi_top() {
-        // calculate coefficients of lin eq.
-        for (int i = 0; i < out_top.size(); i++) {
-
-        }
+    public Matrix get_A1() {
+        int[] data = {1, 1, 0, 1};
+        return make_g(data, input.size());
     }
 
+    //11,01,01,01,00,00,10,01,00,00,01,11,11,01,10,11,00
 
+    public Matrix get_y0() {
+        Matrix a0 = get_A0();
+        Matrix g = new Matrix(1, input.size());
+        for (int i = 0; i < input.size(); i++)
+            g.set(0, i, input.get(i));
 
-    public void jacobi_bot() {}
-
-    public int division(int dividend, int divisor) {
-        boolean negative = false;
-
-        if ((dividend & (1 << 31)) == (1 << 31)) { // Check for signed bit
-            negative = !negative;
-            dividend = add(~dividend, 1);  // Negation
-        }
-
-        if ((divisor & (1 << 31)) == (1 << 31)) {
-            negative = !negative;
-            divisor = add(~divisor, 1);  // Negation
-        }
-
-        int quotient = 0;
-        long r;
-
-        for (int i = 30; i >= 0; i = subtract(i, 1)) {
-            r = (divisor << i);
-           // Left shift divisor until it's smaller than dividend
-            if (r < Integer.MAX_VALUE && r >= 0) { // Avoid cases where comparison between long and int doesn't make sense
-                if (r <= dividend) {
-                    quotient |= (1 << i);
-                    dividend = subtract(dividend, (int) r);
-                }
-            }
-        }
-        if (negative) {
-            quotient = add(~quotient, 1);
-        }
-        return quotient;
+        return Matrix.mult(Matrix.transpose(a0), Matrix.transpose(g));
     }
 
-    public int add(int a, int b) {
+    public Matrix get_y1() {
+        Matrix a0 = get_A1();
+        Matrix g = new Matrix(1, input.size());
+        for (int i = 0; i < input.size(); i++)
+            g.set(0, i, input.get(i));
 
-        int partialSum, carry;
-
-        do {
-            partialSum = a ^ b;
-            carry = (a & b) << 1;
-
-            a = partialSum;
-            b = carry;
-
-        } while (carry != 0);
-
-        return partialSum;
+        return Matrix.mult(Matrix.transpose(a0), Matrix.transpose(g));
     }
 
-    public int subtract(int a, int b) {
-        return add(a, add(~b, 1));
+    public ArrayList<String> get_y() {
+        // multiplex the output
+        Matrix y0 = get_y0();
+        Matrix y1 = get_y1();
+        // System.out.println(y0.getRows());
+        // System.out.println(y1.getRows());
+        Matrix y = new Matrix(y0.getRows(), 1);
+        ArrayList<String> y_out = new ArrayList<String>();
+        //System.out.println(y.getRows());
+        for (int i = 0; i < y0.getRows(); i++) {
+            // System.out.println((int)y0.get(1, i));
+            // System.out.println((int)y1.get(1));
+            String multi = ((int)(y0.get(i, 0)))%2 + "" + ((int)y1.get(i, 0))%2 + "";
+            // System.out.print(multi + " ");
+            y_out.add(multi);
+        }
+        return y_out;
     }
 
-    public void make_g(int[] data, int n) {
+    public Matrix make_g(int[] data, int n) {
         // calc dimensions: data.length * (data.length + n)
-        double[][] d = new double[n][data.length + n*2];
+        double[][] d = new double[n][data.length + n-1];
         Matrix g = new Matrix(d);
         // fill it in
         int shift = 0;
@@ -174,25 +159,12 @@ public class ShiftRegister {
             for (int j = 0; j < data.length; j++) {
                 g.set(i,j + shift, data[j]);
             }
-            shift += 2;
+            shift += 1;
         }
-        g.print();
+        return g;
     }
 
     public String toString() {
-        System.out.println(out_top.size());
-        System.out.println(out_bot.size());
         return out_top + "\n" + out_bot;
-    }
-
-    public static void main(String[] args) {
-        int[] h = {1};
-        System.out.println(h.length);
-        ShiftRegister sr = new ShiftRegister(h);
-        sr.generate();
-        int[] g = {1,0,1,1,0};
-        sr.make_g(g, h.length);
-        System.out.println(sr);
-        System.out.println(sr.division(1101,0100));
     }
 }
