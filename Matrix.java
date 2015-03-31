@@ -125,17 +125,16 @@ public class Matrix {
         return trans;
     }
 
-
     public double get(int i, int j) {
         if (!isValid(i, j)) {
-            throw new IllegalArgumentException("out of bounds pl0x");
+            throw new IllegalArgumentException("out of bounds pl0x: " + i + " " + j + " in \n" + toString());
         }
         return backing.get(i).get(j).doubleValue();
     }
 
     public void set(int i, int j, double value) {
         if (!isValid(i, j)) {
-            throw new IllegalArgumentException("out of bounds pl0x");
+            throw new IllegalArgumentException("out of bounds pl0x: " + i + " " + j + " in \n" + toString());
         }
         backing.get(i).set(j, value);
     }
@@ -145,6 +144,17 @@ public class Matrix {
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
                 representation += String.format("%03.6f\t", get(i,j));
+            }
+            representation += "\n";
+        }
+        return representation;
+    }
+
+    public String toStringInt() {
+        String representation = "";
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                representation += ((int)get(i,j)%2) + "  ";
             }
             representation += "\n";
         }
@@ -222,6 +232,31 @@ public class Matrix {
                 set(i, j, value);
             }
         }
+    }
+
+    public static Matrix bad_inverse(Matrix m) {
+        Matrix big = new Matrix(m.getRows(), m.getCols() * 2);
+        for (int i = 0; i < m.getRows(); i++) {
+            for (int j = 0; j < m.getCols() * 2; j++) {
+                if (j < m.getCols()) {
+                    big.set(i, j, m.get(i, j));
+                } else if (i == j - m.getCols()) {
+                    big.set(i, j, 1);
+                }
+            }
+        }
+        big.rref();
+
+        Matrix extract = new Matrix(m.getRows(), m.getCols());
+        for (int i = 0; i < m.getRows(); i++) {
+            int k = 0;
+            for (int j = m.getCols(); j < big.getCols(); j++) {
+                extract.set(i, k, big.get(i, j));
+                k++;
+            }
+        }
+
+        return mult(extract, m);
     }
 
     /**
@@ -411,11 +446,12 @@ public class Matrix {
 
 
         Matrix m = new Matrix(input);
-        FactoredMatrix givens = m.qr_fact_house();
-        Matrix m2 = new Matrix(input2);
-        System.out.println(givens.left);
-        System.out.println(givens.right);
-        System.out.println(givens.error);
+        bad_inverse(m);
+        // FactoredMatrix givens = m.qr_fact_house();
+        // Matrix m2 = new Matrix(input2);
+        // System.out.println(givens.left);
+        // System.out.println(givens.right);
+        // System.out.println(givens.error);
     }
 
 }
