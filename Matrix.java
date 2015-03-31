@@ -256,7 +256,7 @@ public class Matrix {
             }
         }
 
-        return mult(extract, m);
+        return extract;
     }
 
     /**
