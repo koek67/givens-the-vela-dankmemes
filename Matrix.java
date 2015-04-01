@@ -155,6 +155,8 @@ public class Matrix {
     }
 
 
+    public String toStringInt() { return null; }
+
     public double get(int i, int j) {
         if (!isValid(i, j)) {
             throw new IllegalArgumentException("out of bounds pl0x");
@@ -251,6 +253,20 @@ public class Matrix {
                 set(i, j, value);
             }
         }
+    }
+
+    public static boolean equals(Matrix a, Matrix b) {
+        if (a.getRows() != b.getRows() || a.getCols() != b.getCols()) {
+            return false;
+        }
+        for (int i = 0; i < a.getRows(); i++) {
+            for (int j = 0; j < b.getRows(); j++) {
+                if (a.get(i, j) != b.get(i, j)) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     /**

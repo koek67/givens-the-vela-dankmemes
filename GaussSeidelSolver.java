@@ -66,6 +66,10 @@ public class GaussSeidelSolver {
         return s;
     }
 
+    public Matrix getA() { return a_old; }
+    public Matrix getb() { return b_old; }
+    public Matrix getX() { return new_out; }
+    public boolean getConv() { return conv; }
     public static void main(String[] args) {
         Random numGen = new Random();
         double[][] m1 = {
@@ -86,12 +90,36 @@ public class GaussSeidelSolver {
         };
         GaussSeidelSolver js = new GaussSeidelSolver(new Matrix(m1), new Matrix(m2), new Matrix(m3));
         js.iterate();
-        System.out.println(js);
+        //System.out.println(js);
 
 
-        for (int i = 0; i < 1000; i++) {
+        for (int k = 0; k < 100; k++) {
             // choose random dimension
+            int r = numGen.nextInt(20) + 1;
+            // create the matricies
+            Matrix a = new Matrix(r, r);
+            Matrix b = new Matrix(r, 1);
+            Matrix x = new Matrix(r, 1);
+            // fill the matricies
+            for (int i = 0; i < a.getRows(); i++) {
+                for (int j = 0; j < a.getCols(); j++) {
+                    a.set(i, j, 10*numGen.nextDouble() + 1.);
+                }
+            }
+
+            for (int i = 0; i < r; i++) {
+                b.set(i, 0, 40*numGen.nextDouble() + 1.);
+                x.set(i, 0, 0);
+            }
+            js = new GaussSeidelSolver(a, b, x);
+            js.iterate();
+            boolean done = Matrix.equals(Matrix.mult(js.getA(), js.getX()), js.getb());
+            if (!done && js.getConv()) {
+                System.out.println(js);
+                return;
+            }
         }
+        System.out.println("done");
     }
 
 }
