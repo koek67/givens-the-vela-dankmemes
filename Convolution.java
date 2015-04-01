@@ -1,3 +1,4 @@
+import javax.swing.plaf.basic.BasicInternalFrameTitlePane;
 import java.util.*;
 
 public class Convolution {
@@ -32,7 +33,12 @@ public class Convolution {
     }
 
     public static void main(String[] args) {
-        test(20, 5);
+        while (true) {
+            System.out.println("Enter the length of the input, an integer n");
+            Scanner kb = new Scanner(System.in);
+            int input = kb.nextInt();
+            test(1, input);
+        }
     }
 
 
