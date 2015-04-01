@@ -25,7 +25,6 @@ public class Convolution {
         return r;
     }
 
-<<<<<<< HEAD
     public static void decode(Matrix in) {
         int l = in.getRows();
         Matrix y0 = new Matrix(l / 2, 1);
@@ -63,7 +62,7 @@ public class Convolution {
             System.out.println("Enter the length of the input, an integer n");
             Scanner kb = new Scanner(System.in);
             int input = kb.nextInt();
-            generate_rand_stream(1, input);
+            generate_rand_stream(input);
         }
     }
 
