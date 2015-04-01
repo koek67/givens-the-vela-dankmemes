@@ -18,6 +18,11 @@ public class FactorizationSolver {
             System.out.println("error for LU of input matrix");
             System.out.println(m.lu_fact().error);
             System.out.println();
+
+            System.out.println("error for LU Hxsol - b of input matrix");
+            System.out.println(Matrix.norm(Matrix.subtract(Matrix.mult(m,  m.solve_lu_b(b)), b)));
+            System.out.println();
+
             System.out.println("xsol for householders QR of input matrix");
             System.out.println(m.solve_qr_b_H(b));
             System.out.println();
@@ -26,6 +31,13 @@ public class FactorizationSolver {
 
             System.out.println(m.qr_fact_house().error);
             System.out.println();
+
+            System.out.println("error for HouseHolder Hxsol - b of input matrix");
+            System.out.println(Matrix.norm(Matrix.subtract(Matrix.mult(m,  m.solve_qr_b_H(b)), b)));
+            System.out.println();
+
+
+
             System.out.println("xsol for Givens QR of input matrix");
             System.out.println(sol);
             System.out.println();

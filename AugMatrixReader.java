@@ -10,7 +10,7 @@ public class AugMatrixReader {
 
     public AugMatrixReader()
     {
-        System.out.println("Enter the input Augmented matrix A|b");
+        System.out.println("Enter the input Augmented matrix A|b data file");
         Scanner keyboard = new Scanner(System.in);
         String filename = keyboard.nextLine();
         File file = new File(filename);

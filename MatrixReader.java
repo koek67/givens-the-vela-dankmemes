@@ -10,7 +10,7 @@ public class MatrixReader {
 
     public MatrixReader()
     {
-        System.out.println("Enter the input vector or matrix x ");
+        System.out.println("Enter the input vector or matrix data file ");
         Scanner keyboard = new Scanner(System.in);
         String filename = keyboard.nextLine();
         File file = new File(filename);

@@ -32,13 +32,15 @@ public class Convolution {
             int[] input = new int[n];
             //int[] input = {1,0,1,1};
             Random numGen = new Random();
-            for (int i = 0; i < input.length; i++) {
-                input[i] = numGen.nextInt(200) % 2;
+            for (int j = 0; j < input.length; j++) {
+                input[j] = numGen.nextInt(200) % 2;
             }
             // create a Shift register object with the input
             ShiftRegister sr = new ShiftRegister(input);
             Matrix a0 = sr.get_A0();
             Matrix a1 = sr.get_A1();
+            System.out.println(a0);
+            System.out.println(a1);
         }
     }
 
