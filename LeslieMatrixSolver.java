@@ -22,7 +22,7 @@ public class LeslieMatrixSolver {
     }
 
     public void get_year(int year) {
-        for (int i = 0; i < (year - start_year) % 10 + 1; i++) {
+        for (int i = 0; i < year; i++) {
             this.pop = Matrix.mult(leslie, pop);
             curr_year+=10;
         }
@@ -53,7 +53,7 @@ public class LeslieMatrixSolver {
     public static Matrix get_std_leslie() {
         double[][] les =
                             {
-                            { 0, 1.2, 1.1, .9, .1,   0,  0,    0, 0},
+                            { 0, .6, 1.1, .9, .1,   0,  0,    0, 0},
                             {.7,   0,   0,  0,  0,   0,  0,    0, 0},
                             { 0, .85,   0,  0,  0,   0,  0,    0, 0},
                             { 0,   0,  .9,  0,  0,   0,  0,    0, 0},
@@ -92,10 +92,19 @@ public class LeslieMatrixSolver {
 
     public static void main(String[] args) {
         LeslieMatrixSolver ls = new LeslieMatrixSolver(get_std_leslie(), get_std_pop(), 2000);
-        ls.get_year(2010);
+        ls.get_year(1);
         System.out.println(ls);
+        ls.reset();
+        ls.get_year(2);
+        System.out.println(ls);
+        ls.reset();
+        ls.get_year(3);
+        System.out.println(ls);
+        ls.reset();
+
         PowerMethodSolver ps = new PowerMethodSolver(get_std_leslie(), get_std_pop(), 10E-08);
         ps.iterate();
+        System.out.println(ps);
         //System.out.println(ps);
     }
 }

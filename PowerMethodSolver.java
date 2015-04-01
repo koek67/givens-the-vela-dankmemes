@@ -22,6 +22,22 @@ public class PowerMethodSolver {
         u_k0 = 0;
         u_k1 = x0_old.norm();
     }
+    public PowerMethodSolver(Matrix a, double tol) {
+        Matrix b = new Matrix(a.getRows(), 1);
+        // fill in with ones
+        for (int i = 0; i < b.getRows(); i++) {
+            for (int j = 0; j < b.getCols(); j++) {
+                b.set(i, j, 1);
+            }
+        }
+        this.a_old = a;
+        this.x0_old = b;
+        this.a = a_old.clone();
+        x0_new = x0_old.clone();
+        this.tol = tol;
+        u_k0 = 0;
+        u_k1 = x0_old.norm();
+    }
 
     public PowerMethodSolver(Matrix a, Matrix x0, double tol) {
         this.a_old = a;

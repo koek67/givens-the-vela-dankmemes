@@ -8,8 +8,6 @@ public class gauss_seidel {
         AugMatrixReader input1 = new AugMatrixReader();
         Matrix m = input1.getM();
         Matrix b = input1.getB();
-        System.out.println(m);
-        System.out.println(b);
         MatrixReader input2 = new MatrixReader();
         Matrix x = input2.getM();
         System.out.println("Enter the tolerance");
