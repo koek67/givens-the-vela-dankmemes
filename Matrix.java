@@ -27,6 +27,17 @@ public class Matrix {
         init();
     }
 
+    public String toStringInt() {
+        String representation = "";
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                representation += String.format("%03.6d\t", (int) get(i,j));
+            }
+            representation += "\n";
+        }
+        return representation;
+    }
+
     /**
      * will convert a 2D array into a 2D ArrayList
      */
