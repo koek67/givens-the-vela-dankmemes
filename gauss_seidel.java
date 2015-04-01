@@ -15,7 +15,7 @@ public class gauss_seidel {
         System.out.println("Enter the tolerance");
         Scanner kb = new Scanner(System.in);
         double tol = kb.nextDouble();
-        GaussSeidelSolver gs = new GaussSeidelSolver(m, b, x, 5000, tol);
+        GaussSeidelSolver gs = new GaussSeidelSolver(m, b, x, tol);
         System.out.println(gs);
     }
 }

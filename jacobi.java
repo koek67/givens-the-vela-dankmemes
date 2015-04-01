@@ -18,7 +18,7 @@ public class jacobi {
         System.out.println("Enter the tolerance");
         Scanner kb = new Scanner(System.in);
         double tol = kb.nextDouble();
-        JacobiSolver js = new JacobiSolver(m, b, x, 5000, tol);
+        JacobiSolver js = new JacobiSolver(m, b, x, tol);
         System.out.println(js);
     }
 }
